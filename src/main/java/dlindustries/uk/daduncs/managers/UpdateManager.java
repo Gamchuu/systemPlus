@@ -1,6 +1,6 @@
 /*
- * This file is part of System Client (https://github.com/DLindustries/System)
- * Website: https://system.daduncs.cloud
+ * This file is part of System Client (https://github.com/daduncs/system)
+ * Website: https://download.daduncs.cloud
  *
  * Copyright (c) 2024 - 2026 DLindustries and project contributors.
  *
@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 public final class UpdateManager {
 
 	public static final String RELEASE_ON_GITHUB =
-			"https://api.github.com/repos/DLindustries/System/releases/latest";
+			"https://api.github.com/repos/daduncs/system/releases/latest";
 
 	public static final String DISCORD_INVITE = "https://discord.gg/DQ9QmSBnsV";
 
@@ -47,7 +47,7 @@ public final class UpdateManager {
 
 	private String latestReleaseTag = "";
 	private String latestReleaseTitle = "";
-	private String latestReleaseUrl = "https://github.com/DLindustries/System/releases/latest";
+	private String latestReleaseUrl = "https://github.com/daduncs/system/releases";
 	private String latestReleaseDownloadUrl = "";
 
 	private boolean fetched = false;
@@ -157,7 +157,7 @@ public final class UpdateManager {
 	public String getDownloadUrl() {
 		if (!latestReleaseDownloadUrl.isEmpty()) return latestReleaseDownloadUrl;
 		if (!latestReleaseUrl.isEmpty()) return latestReleaseUrl;
-		return "https://github.com/DLindustries/System/releases/latest";
+		return "https://github.com/daduncs/system/releases";
 	}
 
 	public List<?> getBlocks() {
