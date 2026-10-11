@@ -1,6 +1,6 @@
 /*
- * This file is part of System Client (https://github.com/DLindustries/System)
- * Website: https://system.daduncs.cloud
+ * This file is part of System Client (https://github.com/daduncs/system)
+ * Website: https://download.daduncs.cloud/
  *
  * Copyright (c) 2024 - 2026 DLindustries and project contributors.
  *
