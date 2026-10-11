@@ -1,0 +1,12 @@
+{
+  "click": { "sounds": [ { "name": "system:click", "stream": false } ] },
+  "hover": { "sounds": [ { "name": "system:hover", "stream": false } ] },
+  "toggle": { "sounds": [ { "name": "system:toggle", "stream": false } ] },
+  "collapse": { "sounds": [ { "name": "system:collapse", "stream": false } ] },
+  "scroll": { "sounds": [ { "name": "system:scroll", "stream": false } ] },
+  "keypress": { "sounds": [ { "name": "system:keypress", "stream": false } ] },
+  "type": { "sounds": [ { "name": "system:type", "stream": false } ] },
+  "close": { "sounds": [ { "name": "system:close", "stream": false } ] },
+  "open": { "sounds": [ { "name": "system:open", "stream": false } ] },
+  "close_quick": { "sounds": [ { "name": "system:close_quick", "stream": false } ] }
+}

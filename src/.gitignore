@@ -1,0 +1,5 @@
+# Keep this source tree tracked.
+# Build output never belongs under src/.
+*.class
+*.jar
+*.hprof

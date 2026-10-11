@@ -1,0 +1,45 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dlindustries.uk.daduncs.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ClientConnectionMixin",
+    "EndCrystalItemMixin",
+    "ItemStackMixin",
+    "LivingEntityAccessor",
+    "PlayerInteractEntityC2SPacketAccessor",
+    "TeamMixin",
+    "WorldAccessor"
+  ],
+  "client": [
+    "CameraMixin",
+    "ChatHudMixin",
+    "ChatScreenMixin",
+    "ClientPlayerEntityMixin",
+    "ClientPlayerInteractionManagerAccessor",
+    "ClientPlayerInteractionManagerMixin",
+    "FogRendererMixin",
+    "GameRendererMixin",
+    "HandledScreenMixin",
+    "InGameHudMixin",
+    "InputAccessor",
+    "KeyBindingAccessor",
+    "KeyBindingMixin",
+    "KeyboardInputMixin",
+    "KeyboardMixin",
+    "MinecraftClientAccessor",
+    "MinecraftClientMixin",
+    "MouseMixin",
+    "PlayerEntityRendererMixin",
+    "OtherClientPlayerEntityAccessor",
+    "RenderLayerAccessor",
+    "ScreenMixin",
+    "SkyRenderingMixin",
+    "TextDisplayEntityMixin",
+    "WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

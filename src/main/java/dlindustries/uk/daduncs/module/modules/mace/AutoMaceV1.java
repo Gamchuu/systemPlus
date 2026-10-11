@@ -1,0 +1,524 @@
+/*
+ * This file is part of System Client (https://github.com/DLindustries/System)
+ * Website: https://system.daduncs.cloud
+ *
+ * Copyright (c) 2024 - 2026 DLindustries and project contributors.
+ *
+ * System Client is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * System Client is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with System Client. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package dlindustries.uk.daduncs.module.modules.mace;
+
+import dlindustries.uk.daduncs.System;
+import dlindustries.uk.daduncs.event.events.AttackListener;
+import dlindustries.uk.daduncs.event.events.HudListener;
+import dlindustries.uk.daduncs.event.events.TickListener;
+import dlindustries.uk.daduncs.gui.Notice;
+import dlindustries.uk.daduncs.managers.AntibanbyDaduncs;
+import dlindustries.uk.daduncs.mixin.ClientPlayerInteractionManagerAccessor;
+import dlindustries.uk.daduncs.module.Category;
+import dlindustries.uk.daduncs.module.Module;
+import dlindustries.uk.daduncs.module.modules.crystal.HitManager;
+import dlindustries.uk.daduncs.module.modules.sword.AimAssist;
+import dlindustries.uk.daduncs.module.modules.sword.TriggerBot;
+import dlindustries.uk.daduncs.module.setting.bool;
+import dlindustries.uk.daduncs.module.setting.number;
+import dlindustries.uk.daduncs.module.setting.range;
+import dlindustries.uk.daduncs.utils.*;
+import dlindustries.uk.daduncs.utils.rotation.Rotation;
+import dlindustries.uk.daduncs.utils.rotation.SilentAim;
+import dlindustries.uk.daduncs.utils.rotation.SilentRot;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public final class AutoMaceV1 extends Module implements TickListener, AttackListener, HudListener {
+
+	public AutoMaceV1() {
+		super(EncryptedString.of("AutoMaceV1"), EncryptedString.of("A simple auto mace yogis made"), -1, Category.MACE);
+		addSettings(delay, height, switchBack, breachSwap, aim, aimSpeed, silent, silentSpeed, spam);
+	}
+
+	private final number delay = new number(EncryptedString.of("Delay"), 0, 1000, 200, 1);
+	private final number height = new number(EncryptedString.of("Height"), 0.5, 5, 1.5, 0.1);
+	private final bool switchBack = new bool(EncryptedString.of("Switch Back"), true);
+	private final bool breachSwap = new bool(EncryptedString.of("Breach Swap"), true);
+	private final bool aim = new bool(EncryptedString.of("Aim"), true);
+	private final number aimSpeed = new number(EncryptedString.of("Aim Speed"), 50, 2000, 1000, 10);
+	private final bool silent = new bool(EncryptedString.of("Silent Rotations"), false)
+			.setDescription(EncryptedString.of("Aims server side only, your camera doesn't move"));
+	private final range silentSpeed = new range(EncryptedString.of("Silent Speed"), 0, 600, 1, 100, 150);
+	private final bool spam = new bool(EncryptedString.of("Spam"), true);
+
+	private static final int SLAM = 1;
+	private static final int DONE = 2;
+	private static final int SLAM_WAIT = 3;
+	private static final int BREAK_WAIT = 40;
+
+	private final TimerUtils timer = new TimerUtils();
+	private final double[] gcd = new double[2];
+	private PlayerEntity target;
+	private boolean wasOnGround;
+	private boolean jumped;
+	private boolean swung;
+	private boolean holding;
+	private int step;
+	private int broke;
+	private int slamWait;
+	private int prevSlot = -1;
+
+	@Override
+	public void onEnable() {
+		List<String> disabled = new ArrayList<>();
+		for (Class<? extends Module> type : List.of(TriggerBot.class, AimAssist.class, HitManager.class, MaceSwap.class)) {
+			Module module = System.INSTANCE.getModuleManager().getModule(type);
+			if (module != null && module.isEnabled()) {
+				module.setEnabled(false);
+				disabled.add(module.getName().toString());
+			}
+		}
+
+		if (!disabled.isEmpty())
+			Notice.show(join(disabled) + (disabled.size() == 1 ? " was" : " were") + " turned off to not interfere with the AutoMace");
+
+		eventManager.add(TickListener.class, this);
+		eventManager.add(AttackListener.class, this);
+		eventManager.add(HudListener.class, this);
+
+		target = null;
+		jumped = false;
+		swung = false;
+		holding = false;
+		step = 0;
+		broke = 0;
+		slamWait = 0;
+		prevSlot = -1;
+		timer.reset();
+		super.onEnable();
+	}
+
+	@Override
+	public void onDisable() {
+		eventManager.remove(TickListener.class, this);
+		eventManager.remove(AttackListener.class, this);
+		eventManager.remove(HudListener.class, this);
+
+		if (prevSlot != -1) {
+			swapBack();
+		}
+
+		target = null;
+		jumped = false;
+		swung = false;
+		step = 0;
+		broke = 0;
+		slamWait = 0;
+		prevSlot = -1;
+		SilentAim.stop(this);
+		super.onDisable();
+	}
+
+	@Override
+	public void onTick() {
+		if (mc.currentScreen != null || mc.player == null) return;
+
+		trackJump();
+
+		if (broke > 0) broke--;
+
+		if (step == SLAM) {
+			slam();
+			return;
+		}
+
+		if (step == DONE || prevSlot != -1) {
+			swapBack();
+			return;
+		}
+
+		target = findTarget();
+
+		if (target == null) return;
+		if (System.INSTANCE.getFriendManager().isFriend(target)) return;
+
+		int mace = maceSlot();
+		int axe = InventoryUtils.getAxeSlot();
+
+		if (mace == -1) return;
+
+		if (!spam.getValue()) {
+			if (!timer.hasReached(delay.getValue())) return;
+			if (swung) return;
+		}
+
+		int currentSlot = mc.player.getInventory().getSelectedSlot();
+
+		if (!canHit()) return;
+
+		if (broke == 0 && shielded(target) && axe != -1) {
+			prevSlot = currentSlot;
+			if (selectSlot(axe) && attackTarget(target)) {
+				timer.reset();
+				broke = BREAK_WAIT;
+				slamWait = 0;
+				step = SLAM;
+			}
+			return;
+		}
+
+		if (target.hurtTime > 1 && !aboutToLand()) return;
+
+		prevSlot = currentSlot;
+		if (selectSlot(mace)) {
+			attackTarget(target);
+			timer.reset();
+			swung = true;
+			step = DONE;
+		}
+	}
+
+	@Override
+	public void onAttack(AttackEvent event) {
+		if (!breachSwap.getValue() || mc.player == null) return;
+		if (step != 0 || prevSlot != -1 || broke > 0) return;
+		if (!WorldUtils.isSword(mc.player.getMainHandStack())) return;
+		if (maceSlot() == -1) return;
+
+		if (!(mc.crosshairTarget instanceof EntityHitResult hit)) return;
+		if (!(hit.getEntity() instanceof PlayerEntity player)) return;
+		if (System.INSTANCE.getFriendManager().isFriend(player)) return;
+
+		target = player;
+		int axe = InventoryUtils.getAxeSlot();
+
+		if (shielded(player) && axe != -1) {
+			prevSlot = mc.player.getInventory().getSelectedSlot();
+			if (selectSlot(axe)) {
+				broke = BREAK_WAIT;
+				slamWait = 0;
+				step = SLAM;
+			}
+			return;
+		}
+
+		if (!jumped) return;
+		int breach = breachSlot();
+		if (breach == -1) return;
+
+		prevSlot = mc.player.getInventory().getSelectedSlot();
+		if (selectSlot(breach)) {
+			step = DONE;
+		}
+	}
+
+	@Override
+	public void onRenderHud(HudEvent event) {
+		if (mc.player == null) return;
+
+		if (silent.getValue()) {
+			silentAim();
+			return;
+		}
+
+		SilentAim.stop(this);
+		if (!aim.getValue()) return;
+		if (target == null || target.isRemoved() || !target.isAlive() || mc.currentScreen != null) return;
+		if (!falling() || maceSlot() == -1) return;
+		if (mc.player.squaredDistanceTo(target) > 16) return;
+
+		if (held(holding ? 0f : -0.15f)) {
+			holding = true;
+			return;
+		}
+
+		holding = false;
+
+		Vec3d baseTarget = target.getBoundingBox().getCenter();
+		Vec3d wanderingTarget = RotationUtils.getWanderingTargetPoint(target, baseTarget);
+		Rotation look = RotationUtils.getDirection(mc.player.getEyePos(), wanderingTarget);
+		float seconds = mc.getRenderTickCounter().getFixedDeltaTicks() / 20f;
+
+		float yaw = towards(mc.player.getYaw(), (float) look.yaw(), seconds, 1.0f, 30.0f);
+		float pitch = towards(mc.player.getPitch(), (float) look.pitch(), seconds, 0.4f, 12.0f);
+
+		Rotation smooth = RotationUtils.applyGCD(mc.player.getYaw(), mc.player.getPitch(), yaw, pitch, gcd, true);
+
+		mc.player.setYaw((float) smooth.yaw());
+		mc.player.setPitch(MathHelper.clamp((float) smooth.pitch(), -90.0F, 90.0F));
+	}
+
+	private void silentAim() {
+		boolean valid = aim.getValue() && target != null && !target.isRemoved() && target.isAlive() && mc.currentScreen == null
+				&& falling() && maceSlot() != -1 && mc.player.squaredDistanceTo(target) <= 16;
+
+		if (valid && SilentAim.rotateTo(this, target, silentSpeed.getRandomValueFloat(), silentSpeed.getRandomValueFloat(), 50f))
+			return;
+
+		SilentAim.rotateBack(this, silentSpeed.getRandomValueFloat(), silentSpeed.getRandomValueFloat());
+	}
+
+	private Vec3d look() {
+		if (silent.getValue() && SilentRot.on())
+			return WorldUtils.getPlayerLookVec(SilentRot.yaw(), SilentRot.pitch());
+
+		return WorldUtils.getPlayerLookVec(mc.player);
+	}
+
+	private static String join(List<String> names) {
+		if (names.size() == 1)
+			return names.get(0);
+
+		return String.join(", ", names.subList(0, names.size() - 1)) + " and " + names.get(names.size() - 1);
+	}
+
+	private void trackJump() {
+		if (mc.player == null) return;
+		if (mc.player.isOnGround()) {
+			jumped = false;
+			swung = false;
+		} else if (wasOnGround && mc.player.getVelocity().y > 0) {
+			jumped = true;
+		}
+
+		wasOnGround = mc.player.isOnGround();
+	}
+
+	private void slam() {
+		if (target == null || target.isRemoved() || !target.isAlive() || ++slamWait > SLAM_WAIT) {
+			slamWait = 0;
+			step = DONE;
+			return;
+		}
+
+		int mace = maceSlot();
+		if (mace == -1) {
+			slamWait = 0;
+			step = DONE;
+			return;
+		}
+
+		if (!canReach()) return;
+
+		if (selectSlot(mace) && attackTarget(target)) {
+			timer.reset();
+			swung = true;
+			slamWait = 0;
+			step = DONE;
+		}
+	}
+
+	private void swapBack() {
+		if (switchBack.getValue() && prevSlot != -1) {
+			if (AntibanbyDaduncs.isActionSent() || AntibanbyDaduncs.isSlotPending()) {
+				return;
+			}
+			if (selectSlot(prevSlot)) {
+				prevSlot = -1;
+				step = 0;
+			}
+			return;
+		}
+
+		prevSlot = -1;
+		step = 0;
+	}
+
+	private PlayerEntity findTarget() {
+		if (mc.world == null || mc.player == null) return null;
+		PlayerEntity below = null;
+
+		for (PlayerEntity player : mc.world.getPlayers()) {
+			if (player == mc.player || !player.isAlive()) continue;
+			if (mc.player.getY() < player.getY() + player.getHeight() - 0.5) continue;
+			if (Math.hypot(player.getX() - mc.player.getX(), player.getZ() - mc.player.getZ()) > 2.5) continue;
+
+			below = player;
+		}
+
+		if (below != null) return below;
+
+		if (mc.crosshairTarget instanceof EntityHitResult hit && hit.getEntity() instanceof PlayerEntity player && player.isAlive()) {
+			return player;
+		}
+
+		return null;
+	}
+
+	private boolean selectSlot(int slot) {
+		if (mc.player == null || mc.getNetworkHandler() == null || slot < 0 || slot > 8) return false;
+
+		if (mc.player.getInventory().getSelectedSlot() == slot) {
+			return true;
+		}
+
+		if (AntibanbyDaduncs.isSlotPending() && AntibanbyDaduncs.getPendingSlot() == slot) {
+			return false;
+		}
+
+		if (AntibanbyDaduncs.isActionSent()) {
+			return false;
+		}
+
+		if (mc.player.isUsingItem() && mc.interactionManager != null) {
+			mc.interactionManager.stopUsingItem(mc.player);
+		}
+
+		mc.player.getInventory().setSelectedSlot(slot);
+		if (mc.interactionManager != null) {
+			((ClientPlayerInteractionManagerAccessor) mc.interactionManager).syncSlot();
+		} else {
+			mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+		}
+		return true;
+	}
+
+	private boolean attackTarget(PlayerEntity target) {
+		if (mc.player == null || mc.interactionManager == null || target == null) return false;
+		if (AntibanbyDaduncs.isActionSent() || AntibanbyDaduncs.isAttackSent() || AntibanbyDaduncs.isSlotPending() || AntibanbyDaduncs.isMovementSent()) return false;
+
+		mc.interactionManager.attackEntity(mc.player, target);
+		mc.player.swingHand(Hand.MAIN_HAND);
+		return true;
+	}
+
+	private double getSafeReach() {
+		double safeReach = 2.90;
+		if (!mc.player.isOnGround() && mc.player.getVelocity().y < 0) {
+			safeReach -= Math.min(0.30, Math.abs(mc.player.getVelocity().y));
+		}
+		Vec3d vel = mc.player.getVelocity();
+		double horizSpeed = Math.sqrt(vel.x * vel.x + vel.z * vel.z);
+		if (horizSpeed > 0.05) {
+			safeReach -= Math.min(0.20, horizSpeed * 0.6);
+		}
+		return safeReach;
+	}
+
+	private boolean canReach() {
+		if (mc.player == null || target == null || target.isRemoved() || !target.isAlive()) return false;
+
+		double safeReach = getSafeReach();
+
+		if (WorldUtils.getEyeToBoxDistance(mc.player, target) > safeReach) return false;
+
+		Vec3d eye = mc.player.getEyePos();
+		Vec3d end = eye.add(look().multiply(safeReach));
+		Vec3d point = target.getBoundingBox().raycast(eye, end).orElse(null);
+		if (point == null) return false;
+
+		return mc.world.raycast(new RaycastContext(eye, point, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+	}
+
+	private boolean canHit() {
+		if (!falling() || !canReach()) return false;
+
+		double head = mc.player.getY() - (target.getY() + target.getHeight());
+
+		if (head > -0.5) return head < height.getValue();
+
+		return !target.isOnGround();
+	}
+
+	private boolean held(float grow) {
+		Vec3d eye = mc.player.getEyePos();
+		Vec3d look = look();
+
+		return target.getBoundingBox().expand(grow).raycast(eye, eye.add(look.multiply(getSafeReach()))).isPresent();
+	}
+
+	private boolean shielded(PlayerEntity player) {
+		if (player == null || mc.player == null) return false;
+		if (MaceSwap.isShielding(player)) return true;
+
+		double gap = Math.hypot(player.getX() - mc.player.getX(), player.getZ() - mc.player.getZ());
+
+		return gap < 1.0 && player.isUsingItem() && player.getActiveItem().contains(DataComponentTypes.BLOCKS_ATTACKS);
+	}
+
+	private boolean aboutToLand() {
+		if (mc.player == null || mc.world == null) return false;
+		if (mc.player.isOnGround()) return true;
+		if (mc.player.getVelocity().y >= 0) return false;
+
+		return !mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0, mc.player.getVelocity().y * 2.0, 0));
+	}
+
+	private boolean falling() {
+		if (mc.player == null) return false;
+		if (mc.player.isOnGround()) return false;
+		if (mc.player.isGliding() || mc.player.isTouchingWater()) return false;
+
+		return mc.player.fallDistance > 1.5;
+	}
+
+	private float towards(float from, float to, float seconds, float rate, float cap) {
+		float diff = MathHelper.wrapDegrees(to - from);
+		float factor = 1f - (float) Math.exp(-aimSpeed.getValueFloat() * rate * seconds * 0.03f);
+		float step = diff * factor;
+		float maxStep = cap * Math.max(1.0f, seconds * 20.0f);
+		step = MathHelper.clamp(step, -maxStep, maxStep);
+		return from + step;
+	}
+
+	private int maceSlot() {
+		int plain = plainMaceSlot();
+
+		return plain != -1 ? plain : InventoryUtils.getMaceSlot();
+	}
+
+	private int plainMaceSlot() {
+		if (mc.player == null) return -1;
+
+		for (int i = 0; i < 9; i++) {
+			ItemStack stack = mc.player.getInventory().getStack(i);
+
+			if (stack.isOf(Items.MACE) && !hasBreach(stack)) return i;
+		}
+
+		return -1;
+	}
+
+	private int breachSlot() {
+		if (mc.player == null) return -1;
+
+		for (int i = 0; i < 9; i++) {
+			ItemStack stack = mc.player.getInventory().getStack(i);
+
+			if (stack.isOf(Items.MACE) && hasBreach(stack)) return i;
+		}
+
+		return -1;
+	}
+
+	private static boolean hasBreach(ItemStack stack) {
+		for (RegistryEntry<Enchantment> enchant : stack.getEnchantments().getEnchantments())
+			if (enchant.matchesKey(Enchantments.BREACH)) return true;
+
+		return false;
+	}
+}
