@@ -1,7 +1,7 @@
 # System Client
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/DLindustries/System/total?style=flat-square&color=8a2be2)](https://github.com/DLindustries/System/releases)
-[![GitHub Issues](https://img.shields.io/github/issues/DLindustries/System?style=flat-square&color=8a2be2)](https://github.com/DLindustries/System/issues)
+[![GitHub Downloads](https://img.shields.io/github/downloads/daduncs/system/total?style=flat-square&color=8a2be2)](https://github.com/daduncs/system/releases)
+[![GitHub Issues](https://img.shields.io/github/issues/daduncs/system?style=flat-square&color=8a2be2)](https://github.com/daduncs/system/issues)
 [![License](https://img.shields.io/badge/license-GPL--3.0-8a2be2?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 <a href="https://discord.gg/yynpznJVkC"><img src="https://invidget.switchblade.xyz/yynpznJVkC" alt="Discord Invite"/></a>
@@ -12,7 +12,7 @@
 
 ## Issues
 
-If you notice any bugs or want to make a meaningful suggestion, you can let us know by opening an issue [here](https://github.com/DLindustries/System/issues), or join our discord server and ping me.
+If you notice any bugs or want to make a meaningful suggestion, you can let us know by opening an issue [here](https://github.com/daduncs/system/issues), or join our discord server and ping me.
 
 ## License
 
@@ -35,7 +35,7 @@ For those who are unfamiliar with the license, here is a summary of its main poi
 
 System uses Gradle to build the client. Install the latest version of Gradle onto your computer and install IntelliJ IDEA Ultimate, or use the free community edition.
 
-1. Clone the repository using `git clone --recurse-submodules https://github.com/DLindustries/System`.
+1. Clone the repository using `git clone --recurse-submodules https://github.com/daduncs/system`.
 2. CD into the local repository with the command `cd System`.
 3. Run `./gradlew genSources`.
 4. Open the folder in IntelliJ — feel free to recode the client.
