@@ -6,7 +6,7 @@
 
 <a href="https://discord.gg/yynpznJVkC"><img src="https://invidget.switchblade.xyz/yynpznJVkC" alt="Discord Invite"/></a>
 
-> **🌐 Full website here** [dlindustries.uk](https://dlindustries.uk)
+> **🌐 Full website here** [download.daduncs.cloud](https://download.daduncs.cloud)
 
 ---
 
