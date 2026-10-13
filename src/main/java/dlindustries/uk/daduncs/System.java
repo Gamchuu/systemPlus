@@ -22,6 +22,7 @@ package dlindustries.uk.daduncs;
 
 import dlindustries.uk.daduncs.event.EventManager;
 import dlindustries.uk.daduncs.gui.ClickGui;
+import dlindustries.uk.daduncs.gui.wide.WideGui;
 import dlindustries.uk.daduncs.utils.Sounds;
 import dlindustries.uk.daduncs.managers.AccentManager;
 import dlindustries.uk.daduncs.managers.ConfigManager;
@@ -58,6 +59,7 @@ public final class System {
 	public static System INSTANCE;
 	public boolean guiInitialized;
 	public ClickGui clickGui;
+	public WideGui wideGui;
 	public dlindustries.uk.daduncs.argonsui.ClickGui argonGui;
 	private dlindustries.uk.daduncs.gui.muon.MuonGui muonGui;
 	public Screen previousScreen = null;
@@ -80,6 +82,7 @@ public final class System {
 		this.lyricsManager = new LyricsManager();
 		this.updateManager = new dlindustries.uk.daduncs.managers.UpdateManager();
 		this.clickGui = new ClickGui();
+		this.wideGui = new WideGui();
 		this.argonGui = new dlindustries.uk.daduncs.argonsui.ClickGui();
 		this.accentManager.scan();
 		mc = MinecraftClient.getInstance();

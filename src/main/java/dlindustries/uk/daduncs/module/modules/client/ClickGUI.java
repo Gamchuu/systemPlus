@@ -23,6 +23,7 @@ package dlindustries.uk.daduncs.module.modules.client;
 import dlindustries.uk.daduncs.System;
 import dlindustries.uk.daduncs.gui.ClickGui;
 import dlindustries.uk.daduncs.gui.muon.MuonGui;
+import dlindustries.uk.daduncs.gui.wide.WideGui;
 import dlindustries.uk.daduncs.gui.Theme;
 import dlindustries.uk.daduncs.module.Category;
 import dlindustries.uk.daduncs.module.Module;
@@ -42,6 +43,9 @@ public final class ClickGUI extends Module {
 
 	public static final bool modern = new bool(EncryptedString.of("Modern"), true)
 			.setDescription(EncryptedString.of("Off falls back to vanilla fonts, square corners and item icons"));
+
+	public static final bool skiaText = new bool(EncryptedString.of("Skia Text"), true)
+			.setDescription(EncryptedString.of("Off falls back to legacy font rendering"));
 
 	public static final bool hudGlass = new bool(EncryptedString.of("HudGlass"), false);
 
@@ -63,7 +67,13 @@ public final class ClickGUI extends Module {
 	public static final colour yours = new colour(EncryptedString.of("Your Color"), 0xFF9B6DFF);
 
 	public enum Ui {
-		System, SystemDuo, Argon, Muon
+		System, SystemDuo, SystemPlus {
+			@Override
+			public String toString() {
+				return "System+";
+			}
+		},
+		Argon, Muon
 	}
 
 	public enum Palette {
@@ -72,6 +82,7 @@ public final class ClickGUI extends Module {
 	}
 
 	public static void syncTheme() {
+		dlindustries.uk.daduncs.render.skia.SkiaRenderer.TEXT_ENABLED = skiaText.getValue();
 		switch (theme.getMode()) {
 			case System -> {
 				Theme.accent = 0xFF9B6DFF;
@@ -126,7 +137,7 @@ public final class ClickGUI extends Module {
 				GLFW.GLFW_KEY_RIGHT_SHIFT,
 				Category.CLIENT);
 
-		addSettings(ui, openCloseSounds, uiSounds, theme, yours, modern, hudGlass, sidebarGlass, animatedIcons, randomisedTiming);
+		addSettings(ui, openCloseSounds, uiSounds, theme, yours, modern, skiaText, hudGlass, sidebarGlass, animatedIcons, randomisedTiming);
 	}
 
 	@Override
@@ -155,6 +166,8 @@ public final class ClickGUI extends Module {
 	public void onDisable() {
 		if (mc.currentScreen instanceof ClickGui) {
 			System.INSTANCE.clickGui.onGuiClose();
+		} else if (mc.currentScreen instanceof WideGui) {
+			System.INSTANCE.wideGui.onGuiClose();
 		} else if (mc.currentScreen instanceof dlindustries.uk.daduncs.argonsui.ClickGui) {
 			System.INSTANCE.argonGui.onGuiClose();
 		} else if (mc.currentScreen instanceof MuonGui muon) {
@@ -170,12 +183,13 @@ public final class ClickGUI extends Module {
 		return switch (ui.getMode()) {
 			case Argon -> System.INSTANCE.argonGui;
 			case Muon -> System.INSTANCE.muonGui();
+			case SystemPlus -> System.INSTANCE.wideGui;
 			default -> System.INSTANCE.clickGui;
 		};
 	}
 
 	public static boolean ours(Screen screen) {
-		return screen instanceof ClickGui || screen instanceof dlindustries.uk.daduncs.argonsui.ClickGui || screen instanceof MuonGui;
+		return screen instanceof ClickGui || screen instanceof WideGui || screen instanceof dlindustries.uk.daduncs.argonsui.ClickGui || screen instanceof MuonGui;
 	}
 
 	public static void uiSound(SoundEvent sound) {

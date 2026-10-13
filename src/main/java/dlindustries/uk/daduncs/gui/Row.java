@@ -55,7 +55,13 @@ public final class Row {
 	private boolean focused;
 	private boolean listening;
 	private boolean hovered;
+	private boolean lite;
 	private float alpha = 1f;
+
+	/** When true, value pills render with regular small text instead of bold. */
+	public void setLite(boolean lite) {
+		this.lite = lite;
+	}
 
 	public Row(Setting<?> setting) {
 		this.setting = setting;
@@ -189,9 +195,9 @@ public final class Row {
 	}
 
 	private void renderMode(DrawContext context, mode<?> value, int right, int y) {
-		String label = value.getMode().name().replace("_", " ");
+		String label = value.getMode().toString().replace("_", " ");
 		int count = value.getMode().getDeclaringClass().getEnumConstants().length;
-		int pill = TextRenderer.smallBoldWidth(label) + count * 9 + 20;
+		int pill = nameWidth(label) + count * 9 + 20;
 		int left = right - pill;
 
 		Render2D.drawRoundRect(context, left, y + 4, pill, 19, 9.5f, Theme.fade(Theme.field, alpha));
@@ -206,7 +212,17 @@ public final class Row {
 		Render2D.drawRoundRect(context, left + 10 + value.getModeIndex() * 9f - size / 2f, y + 13.5f - size / 2f,
 				size, size, size / 2f, Theme.fade(Theme.accent, alpha));
 
-		TextRenderer.drawSmallBold(label, context, left + 13 + count * 9, y + 11, Theme.fade(Theme.text, alpha));
+		drawName(label, context, left + 13 + count * 9, y + 11, Theme.fade(Theme.text, alpha));
+	}
+
+	private int nameWidth(String label) {
+		return lite ? TextRenderer.smallWidth(label) : TextRenderer.smallBoldWidth(label);
+	}
+
+	private void drawName(String label, DrawContext context, int x, int y, int color) {
+		if (lite)
+			TextRenderer.drawSmall(label, context, x, y, color);
+		else TextRenderer.drawSmallBold(label, context, x, y, color);
 	}
 
 	private void renderRange(DrawContext context, range value, int right, int y) {
@@ -232,11 +248,11 @@ public final class Row {
 
 	private void renderBind(DrawContext context, bind value, int right, int y) {
 		String label = listening ? "..." : value.getKeyName();
-		int badge = Math.max(34, TextRenderer.smallBoldWidth(label) + 16);
+		int badge = Math.max(34, nameWidth(label) + 16);
 		int left = right - badge;
 
 		Render2D.drawRoundRect(context, left, y + 4, badge, 19, 6, Theme.fade(Theme.field, alpha));
-		TextRenderer.drawSmallBold(label, context, left + (badge - TextRenderer.smallBoldWidth(label)) / 2, y + 11,
+		drawName(label, context, left + (badge - nameWidth(label)) / 2, y + 11,
 				Theme.fade(listening ? Theme.accent : Theme.text, alpha));
 	}
 

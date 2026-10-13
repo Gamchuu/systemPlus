@@ -49,7 +49,7 @@ public final class ModeBox extends RenderableSetting {
 
 		int modeOffset = nameOffset;
 
-		TextRenderer.drawString(setting.getMode().name().replace("_", " "), context, modeOffset, (parentY() + parentOffset() + offset) + 9, new Color(245, 245, 245, 255).getRGB());
+		TextRenderer.drawString(setting.getMode().toString().replace("_", " "), context, modeOffset, (parentY() + parentOffset() + offset) + 9, new Color(245, 245, 245, 255).getRGB());
 
 		if (!parent.parent.dragging) {
 			int toHoverAlpha = isHovered(mouseX, mouseY) ? 15 : 0;

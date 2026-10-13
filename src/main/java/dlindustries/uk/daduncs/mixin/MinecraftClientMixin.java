@@ -154,6 +154,7 @@ public class MinecraftClientMixin {
 	@Inject(method = "stop", at = @At("HEAD"))
 	private void onClose(CallbackInfo ci) {
 		System.INSTANCE.getProfileManager().saveProfile();
+		System.INSTANCE.getConfigManager().save();
 		dlindustries.uk.daduncs.render.skia.SkiaRenderer.close();
 	}
 }

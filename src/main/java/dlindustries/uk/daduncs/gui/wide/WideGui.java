@@ -80,7 +80,6 @@ public final class WideGui extends Screen {
 	private static final int HEADER_H = 50;
 	private static final int FOOTER_H = 44;
 	private static final int MIN_LIST_H = 64;
-	private static final int LIST_BG = 0xFF3E3E45;
 
 	private static final Identifier SEARCH = Identifier.of("system", "textures/gui/search.png");
 	private static final Identifier LOGO = Identifier.of("system", "textures/gui/client_icon.png");
@@ -353,8 +352,9 @@ public final class WideGui extends Screen {
 		if (showSearch())
 			renderSearch(context, content);
 
-		Render2D.drawBlurRoundRect(context, leftX(), leftY(), LEFT_W, leftH(), 10f, 1f, Theme.BLUR * haze, LIST_BG, alpha);
-		Render2D.drawBlurRoundRect(context, rightX(), bgTop(), rightW(), bgHeight(), 10f, 1f, Theme.BLUR * haze, LIST_BG, alpha);
+		int pane = Theme.fade(0xFF000000, 0.30f * alpha);
+		Render2D.drawRoundRect(context, leftX(), leftY(), LEFT_W, leftH(), 10f, pane);
+		Render2D.drawRoundRect(context, rightX(), bgTop(), rightW(), bgHeight(), 10f, pane);
 
 		renderRows(context, mouseX, mouseY, delta, content);
 		renderList(context, mouseX, mouseY, delta, reveal, alpha);
@@ -367,7 +367,7 @@ public final class WideGui extends Screen {
 		int x = searchX();
 		int y = searchY();
 
-		Render2D.drawRoundRect(context, x, y, searchW(), SEARCH_H, 8f, Theme.fade(LIST_BG, alpha));
+		Render2D.drawRoundRect(context, x, y, searchW(), SEARCH_H, 8f, Theme.fade(0xFF000000, 0.30f * alpha));
 		Render2D.drawRoundImage(context, x + 5, y + 4, 24, 24, 0f, SEARCH, Theme.fade(Theme.muted, alpha));
 
 		if (query.isEmpty() && !searchFocused) {
