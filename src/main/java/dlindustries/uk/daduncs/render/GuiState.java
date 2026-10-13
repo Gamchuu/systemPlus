@@ -21,13 +21,12 @@
 package dlindustries.uk.daduncs.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.TextureSetup;
-
 import java.util.function.Consumer;
+import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.gui.ScreenRect;
 
 public record GuiState(
 		RenderPipeline pipeline,

@@ -37,6 +37,7 @@
     "ScreenMixin",
     "SkyRenderingMixin",
     "TextDisplayEntityMixin",
+    "WindowMixin",
     "WorldRendererMixin"
   ],
   "injectors": {

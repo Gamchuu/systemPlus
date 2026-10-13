@@ -21,11 +21,11 @@
 package dlindustries.uk.daduncs.font;
 
 import dlindustries.uk.daduncs.utils.EncryptedString;
-import net.minecraft.client.gui.DrawContext;
 import org.joml.Matrix3x2fStack;
 
 import java.awt.*;
 import java.util.Random;
+import net.minecraft.client.gui.DrawContext;
 
 public final class GlyphPageFontRenderer {
 

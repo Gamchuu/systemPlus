@@ -173,7 +173,7 @@ public final class DtapSetup extends Module implements TickListener, ItemUseList
 							}
 
 							if (clickSimulation.getValue())
-								MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+								InputUtils.rightClick();
 
 							int randomNum = MathUtils.randomInt(1, 100);
 

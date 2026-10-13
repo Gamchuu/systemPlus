@@ -25,17 +25,17 @@ import dlindustries.uk.daduncs.mixin.RenderLayerAccessor;
 import dlindustries.uk.daduncs.render.renderers.pipeline.PipelineInitializer;
 import dlindustries.uk.daduncs.render.renderers.pipeline.PipelineRegistry;
 import dlindustries.uk.daduncs.utils.RenderUtils;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderSetup;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.client.render.RenderSetup;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.BufferAllocator;
 
 public final class WorldFont {
 

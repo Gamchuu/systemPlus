@@ -24,15 +24,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import dlindustries.uk.daduncs.render.Draw;
 import dlindustries.uk.daduncs.render.GuiState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureSetup;
-import net.minecraft.util.Identifier;
 import org.joml.Matrix3x2f;
 
 import java.awt.Color;
@@ -48,6 +39,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.gui.ScreenRect;
 
 public final class MuonFont {
 

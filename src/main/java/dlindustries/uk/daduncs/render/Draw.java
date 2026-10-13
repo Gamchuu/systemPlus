@@ -25,13 +25,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import dlindustries.uk.daduncs.render.renderers.pipeline.PipelineRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.render.VertexConsumer;
+import dlindustries.uk.daduncs.render.skia.SkiaDraw;
+import dlindustries.uk.daduncs.render.skia.SkiaRenderer;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.gui.ScreenRect;
 import org.joml.Matrix3x2f;
 
 public final class Draw {
@@ -43,11 +45,20 @@ public final class Draw {
 
 	private static boolean warmed;
 
+	private static boolean skia() {
+		return SkiaRenderer.ENABLED;
+	}
+
 	public static void warmup(DrawContext context) {
 		if (warmed)
 			return;
 
 		warmed = true;
+
+		if (skia()) {
+			dlindustries.uk.daduncs.font.Fonts.preload();
+			return;
+		}
 
 		dlindustries.uk.daduncs.render.renderers.pipeline.PipelineInitializer.init();
 		dlindustries.uk.daduncs.font.Fonts.preload();
@@ -65,19 +76,35 @@ public final class Draw {
 	}
 
 	public static void rect(DrawContext context, float x, float y, float w, float h, float[] radii, int color) {
+		if (skia()) {
+			SkiaDraw.rect(context, x, y, w, h, radii, color);
+			return;
+		}
 		submit(context, PipelineRegistry.RECTANGLE_PIPELINE, TextureSetup.empty(), x, y, w, h, even(radii), color, 0f);
 	}
 
 	public static void picker(DrawContext context, float x, float y, float w, float h, float round, float hue, int mode) {
+		if (skia()) {
+			SkiaDraw.picker(context, x, y, w, h, round, hue, mode);
+			return;
+		}
 		submit(context, PipelineRegistry.PICKER_PIPELINE, TextureSetup.empty(), x, y, w, h,
 				new float[]{round, mode, 0f, 0f}, 0xFFFFFFFF, hue * 100f);
 	}
 
 	public static void border(DrawContext context, float x, float y, float w, float h, float[] radii, float thickness, int color) {
+		if (skia()) {
+			SkiaDraw.border(context, x, y, w, h, radii, thickness, color);
+			return;
+		}
 		submit(context, PipelineRegistry.BORDER_PIPELINE, TextureSetup.empty(), x, y, w, h, even(radii), color, thickness);
 	}
 
 	public static void image(DrawContext context, float x, float y, float w, float h, float[] radii, Identifier texture, int color) {
+		if (skia()) {
+			SkiaDraw.image(context, x, y, w, h, radii, texture, color);
+			return;
+		}
 		GpuTextureView view = MinecraftClient.getInstance().getTextureManager().getTexture(texture).getGlTextureView();
 		TextureSetup setup = TextureSetup.of(view, RenderSystem.getSamplerCache().get(FilterMode.LINEAR));
 
@@ -97,6 +124,10 @@ public final class Draw {
 
 	public static void head(DrawContext context, float x, float y, float w, float h,
 							float u, float v, float uw, float vh, float round, Identifier texture, int color) {
+		if (skia()) {
+			SkiaDraw.head(context, x, y, w, h, u, v, uw, vh, round, texture, color);
+			return;
+		}
 		GpuTextureView view = MinecraftClient.getInstance().getTextureManager().getTexture(texture).getGlTextureView();
 		TextureSetup setup = TextureSetup.of(view, RenderSystem.getSamplerCache().get(FilterMode.NEAREST));
 
@@ -104,6 +135,11 @@ public final class Draw {
 	}
 
 	public static void captureScene() {
+		if (skia()) {
+			SkiaRenderer.captureScene();
+			copied = true;
+			return;
+		}
 		MinecraftClient client = MinecraftClient.getInstance();
 		var main = client.getFramebuffer();
 
@@ -124,6 +160,11 @@ public final class Draw {
 	}
 
 	public static void askBehind() {
+		if (skia()) {
+			SkiaRenderer.askBehind();
+			asked = true;
+			return;
+		}
 		var main = MinecraftClient.getInstance().getFramebuffer();
 
 		if (main.getColorAttachmentView() == null)
@@ -139,6 +180,9 @@ public final class Draw {
 	}
 
 	public static boolean takeBehind() {
+		if (skia())
+			return SkiaRenderer.takeBehind();
+
 		if (!asked)
 			return false;
 
@@ -148,6 +192,10 @@ public final class Draw {
 	}
 
 	public static void blur(DrawContext context, float x, float y, float w, float h, float round, float radius, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.blur(context, x, y, w, h, round, radius, color, opacity);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 
 		if (!copied || scene == null || scene.getColorAttachmentView() == null) {
@@ -160,6 +208,10 @@ public final class Draw {
 	}
 
 	public static void glass(DrawContext context, float x, float y, float w, float h, float round, float radius, float sheen, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.glass(context, x, y, w, h, round, radius, sheen, color, opacity);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 
 		if (!copied || scene == null || scene.getColorAttachmentView() == null) {
@@ -174,6 +226,10 @@ public final class Draw {
 
 	public static void glyphGlow(DrawContext context, float x, float y, float w, float h,
 								 float glyphX, float glyphY, float spread, Identifier texture, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.glyphGlow(context, x, y, w, h, glyphX, glyphY, spread, texture, color, opacity);
+			return;
+		}
 		GpuTextureView view = MinecraftClient.getInstance().getTextureManager().getTexture(texture).getGlTextureView();
 		TextureSetup setup = TextureSetup.of(view, RenderSystem.getSamplerCache().get(FilterMode.LINEAR));
 
@@ -182,6 +238,10 @@ public final class Draw {
 	}
 
 	public static void bubble(DrawContext context, float x, float y, float w, float h, float round, float radius, float sheen, float lens, int color, float opacity, boolean overGui) {
+		if (skia()) {
+			SkiaDraw.bubble(context, x, y, w, h, round, radius, sheen, lens, color, opacity, overGui);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 		boolean gui = overGui && asked;
 		SimpleFramebuffer source = gui ? behind : scene;
@@ -198,6 +258,10 @@ public final class Draw {
 
 	public static void stairFill(DrawContext context, float x, float y, float w, float h,
 								 float above, float below, float round, float radius, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.stairFill(context, x, y, w, h, above, below, round, radius, color, opacity);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 		float[] packed = {above, below, round, shown * 100f};
 
@@ -212,6 +276,10 @@ public final class Draw {
 
 	public static void stairGlass(DrawContext context, float x, float y, float w, float h,
 								  float above, float below, float round, float radius, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.stairGlass(context, x, y, w, h, above, below, round, radius, color, opacity);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 		float[] packed = {above, below, round, shown * 100f};
 
@@ -231,6 +299,10 @@ public final class Draw {
 
 	public static void stairBorder(DrawContext context, float x, float y, float w, float h,
 								   float above, float below, float round, float thickness, int color) {
+		if (skia()) {
+			SkiaDraw.stairBorder(context, x, y, w, h, above, below, round, thickness, color);
+			return;
+		}
 		submit(context, PipelineRegistry.STAIR_BORDER_PIPELINE, TextureSetup.empty(), x, y, w, h,
 				new float[]{above, below, round, 0f}, color, thickness);
 	}
@@ -260,6 +332,10 @@ public final class Draw {
 	}
 
 	public static void shape(DrawContext context, float x, float y, float w, float h, float radius, float thickness, int color) {
+		if (skia()) {
+			SkiaDraw.shape(context, x, y, w, h, radius, thickness, color);
+			return;
+		}
 		if (PipelineRegistry.SHAPE_PIPELINE == null || w <= 0f || h <= 0f || (color >>> 24) == 0)
 			return;
 
@@ -294,6 +370,10 @@ public final class Draw {
 	}
 
 	public static void frost(DrawContext context, float x, float y, float w, float h, float radius, float spread, int color, float opacity) {
+		if (skia()) {
+			SkiaDraw.frost(context, x, y, w, h, radius, spread, color, opacity);
+			return;
+		}
 		float shown = Math.max(0f, Math.min(1f, opacity));
 
 		if (!copied || scene == null || scene.getColorAttachmentView() == null) {
@@ -341,6 +421,10 @@ public final class Draw {
 	}
 
 	public static void line(DrawContext context, float[] points, float[] widths, int color) {
+		if (skia()) {
+			SkiaDraw.line(context, points, widths, color);
+			return;
+		}
 		int count = points.length / 2;
 		if (PipelineRegistry.LINE_PIPELINE == null || count < 2)
 			return;

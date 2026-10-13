@@ -24,12 +24,11 @@ import dlindustries.uk.daduncs.System;
 import dlindustries.uk.daduncs.event.EventManager;
 import dlindustries.uk.daduncs.event.events.*;
 import dlindustries.uk.daduncs.module.modules.misc.FastPlace;
-import dlindustries.uk.daduncs.utils.MouseSimulation;
+import dlindustries.uk.daduncs.utils.InputUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,6 +49,7 @@ public class MinecraftClientMixin {
 
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void onTick(CallbackInfo ci) {
+		InputUtils.tick();
 		dlindustries.uk.daduncs.module.modules.misc.AutoReconnect.onClientTick();
 
 		if (world != null) {
@@ -88,6 +88,17 @@ public class MinecraftClientMixin {
 		EventManager.fire(new ResolutionListener.ResolutionEvent(this.window));
 	}
 
+	@Inject(
+			method = "render",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/client/gl/Framebuffer;blitToScreen()V"
+			)
+	)
+	private void daduncs_skiaComposite(boolean tick, CallbackInfo ci) {
+		dlindustries.uk.daduncs.render.skia.SkiaRenderer.flushToFramebuffer();
+	}
+
 	@Inject(method = "doItemUse", at = @At("HEAD"), cancellable = true)
 	private void onItemUse(CallbackInfo ci) {
 		if (dlindustries.uk.daduncs.managers.AntibanbyDaduncs.isAttackSent()) {
@@ -100,8 +111,8 @@ public class MinecraftClientMixin {
 		EventManager.fire(event);
 		if (event.isCancelled()) ci.cancel();
 
-		if (MouseSimulation.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
-			MouseSimulation.mouseButtons.put(GLFW.GLFW_MOUSE_BUTTON_RIGHT, false);
+		if (InputUtils.isSimulatedPressed(InputUtils.Button.USE)) {
+			InputUtils.consume(InputUtils.Button.USE);
 			ci.cancel();
 		}
 	}
@@ -121,8 +132,8 @@ public class MinecraftClientMixin {
 			return;
 		}
 
-		if (MouseSimulation.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_1)) {
-			MouseSimulation.mouseButtons.put(GLFW.GLFW_MOUSE_BUTTON_1, false);
+		if (InputUtils.isSimulatedPressed(InputUtils.Button.ATTACK)) {
+			InputUtils.consume(InputUtils.Button.ATTACK);
 			cir.setReturnValue(false);
 		}
 	}
@@ -134,8 +145,8 @@ public class MinecraftClientMixin {
 		EventManager.fire(event);
 		if (event.isCancelled()) ci.cancel();
 
-		if (MouseSimulation.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_1)) {
-			MouseSimulation.mouseButtons.put(GLFW.GLFW_MOUSE_BUTTON_1, false);
+		if (InputUtils.isSimulatedPressed(InputUtils.Button.ATTACK)) {
+			InputUtils.consume(InputUtils.Button.ATTACK);
 			ci.cancel();
 		}
 	}
@@ -143,5 +154,6 @@ public class MinecraftClientMixin {
 	@Inject(method = "stop", at = @At("HEAD"))
 	private void onClose(CallbackInfo ci) {
 		System.INSTANCE.getProfileManager().saveProfile();
+		dlindustries.uk.daduncs.render.skia.SkiaRenderer.close();
 	}
 }

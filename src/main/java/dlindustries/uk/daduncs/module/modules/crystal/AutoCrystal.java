@@ -190,7 +190,7 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 						if ((BlockUtils.isBlock(hit.getBlockPos(), Blocks.OBSIDIAN) || BlockUtils.isBlock(hit.getBlockPos(), Blocks.BEDROCK)) && CrystalUtils.canPlaceCrystalClientAssumeObsidian(hit.getBlockPos())) {
 
 							if (clickSimulation.getValue())
-								MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+								InputUtils.rightClick();
 
 							dlindustries.uk.daduncs.managers.Recorder tm = dlindustries.uk.daduncs.managers.Recorder.getInstance();
 							if (tm != null) {
@@ -215,8 +215,8 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 							if (clickSimulation.getValue()) {
 								if (BlockUtils.isBlock(hit.getBlockPos(), Blocks.OBSIDIAN) || BlockUtils.isBlock(hit.getBlockPos(), Blocks.BEDROCK)) {
 									if (CrystalUtils.canPlaceCrystalClientAssumeObsidian(hit.getBlockPos()))
-										MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
-								} else MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+										InputUtils.leftClick();
+								} else InputUtils.leftClick();
 							}
 
 							mc.interactionManager.attackBlock(hit.getBlockPos(), hit.getSide());
@@ -229,7 +229,7 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 
 					if (!dontPlace && randomInt <= placeChance.getValueInt() && dontBreak) {
 						if (clickSimulation.getValue())
-							MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+							InputUtils.rightClick();
 					}
 				}
 			}
@@ -242,7 +242,7 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 								mc.attackCooldown = 10;
 
 							if (clickSimulation.getValue())
-								MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+								InputUtils.leftClick();
 
 							mc.player.swingHand(Hand.MAIN_HAND);
 
@@ -252,7 +252,7 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 
 					if (!dontPlace && randomInt <= placeChance.getValueInt() && dontBreak) {
 						if (clickSimulation.getValue())
-							MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+							InputUtils.rightClick();
 					}
 				}
 			}
@@ -296,7 +296,7 @@ public final class AutoCrystal extends Module implements TickListener, ItemUseLi
 		}
 
 		if (clickSimulation.getValue())
-			MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+			InputUtils.leftClick();
 
 		WorldUtils.hitEntity(entity, true);
 

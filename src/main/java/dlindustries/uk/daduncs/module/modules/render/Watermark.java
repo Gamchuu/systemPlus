@@ -88,18 +88,21 @@ public final class Watermark extends Module implements HudListener {
 		int tall = TextRenderer.boldHeight();
 		HudEditor.bounds(this, x, y + 7, width, tall);
 
-		int cursor = x;
+		float[] advances = TextRenderer.boldAdvances(LABEL);
+		float cursor = x;
+		float spread = glow.getValueFloat();
+		if (spread > 0) {
+			TextRenderer.drawBoldGlow(LABEL, context, x, y + 15, Theme.fade(Theme.accent, 0.7f), spread * 0.35f);
+		}
+
 		for (int i = 0; i < LABEL.length(); i++) {
 			String letter = String.valueOf(LABEL.charAt(i));
 			float wave = ((float) i / LABEL.length() + drift) % 1f;
 			float lit = wave < 0.5f ? wave * 2f : (1f - wave) * 2f;
 			int colour = Theme.lerp(Theme.accent, Theme.text, lit);
 
-			float spread = glow.getValueFloat();
-			if (spread > 0) TextRenderer.drawBoldGlow(letter, context, cursor, y + 15, Theme.fade(colour, 0.35f + 0.45f * lit), spread * 4f);
-
-			TextRenderer.drawBold(letter, context, cursor, y + 15, colour);
-			cursor += TextRenderer.boldWidth(letter);
+			TextRenderer.drawBold(letter, context, (int) Math.round(cursor), y + 15, colour);
+			cursor += (i < advances.length ? advances[i] : TextRenderer.boldWidth(letter));
 		}
 
 		HudEditor.pop(context);
@@ -119,14 +122,15 @@ public final class Watermark extends Module implements HudListener {
 			Render2D.drawGlassRoundRect(context, x, y, width, tall, tall / 2f, Theme.SHEEN, Theme.BLUR, Theme.surface, 1f);
 		}
 
-		int cursor = x + 8;
+		float[] advances = TextRenderer.menuAdvances(LABEL);
+		float cursor = x + 8;
 		for (int i = 0; i < LABEL.length(); i++) {
 			String letter = String.valueOf(LABEL.charAt(i));
 			float wave = ((float) i / LABEL.length() + drift) % 1f;
 			int colour = Theme.lerp(Theme.accent, Theme.secondary, wave < 0.5f ? wave * 2f : (1f - wave) * 2f);
 
-			TextRenderer.drawMenu(letter, context, cursor, y + tall / 2 - 2, colour);
-			cursor += TextRenderer.menuWidth(letter);
+			TextRenderer.drawMenu(letter, context, (int) Math.round(cursor), y + tall / 2 - 2, colour);
+			cursor += (i < advances.length ? advances[i] : TextRenderer.menuWidth(letter));
 		}
 
 		Render2D.drawRoundRect(context, x + 8 + name + 6, y + 6, 1, 8, 0.5f, Theme.fade(Theme.divider, 0.8f));

@@ -22,7 +22,7 @@ package dlindustries.uk.daduncs.module.modules.render;
 
 import dlindustries.uk.daduncs.System;
 import dlindustries.uk.daduncs.event.events.GameRenderListener;
-import dlindustries.uk.daduncs.font.Fonts;
+import dlindustries.uk.daduncs.font.GlyphPageFontRenderer;
 import dlindustries.uk.daduncs.font.WorldFont;
 import dlindustries.uk.daduncs.gui.Theme;
 import dlindustries.uk.daduncs.managers.LyricsManager;
@@ -33,14 +33,14 @@ import dlindustries.uk.daduncs.module.modules.client.ClickGUI;
 import dlindustries.uk.daduncs.module.setting.bool;
 import dlindustries.uk.daduncs.module.setting.number;
 import dlindustries.uk.daduncs.utils.EncryptedString;
-import net.minecraft.client.render.Camera;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.render.Camera;
+import net.minecraft.util.math.RotationAxis;
 
 public final class WorldLyrics extends Module implements GameRenderListener {
 
@@ -52,6 +52,15 @@ public final class WorldLyrics extends Module implements GameRenderListener {
 	private static final float SCALE = 0.008f;
 	private static final float GLOW = 9f;
 	private static final float TILT = 14f;
+
+	/**
+	 * The world-text glyph atlas, created lazily when the lyrics actually render
+	 * (3D lyrics keep the legacy shader pipeline; only the 2D UI path moved to Skia).
+	 */
+	private static final class WorldFontHolder {
+		private static final GlyphPageFontRenderer FONT = GlyphPageFontRenderer
+				.createStyled("/assets/system/font/unbounded.ttf", 40, Font.BOLD);
+	}
 
 	private final bool artColours = new bool(EncryptedString.of("Art Colors"), false);
 	private final number flow = new number(EncryptedString.of("Gradient Speed"), 0, 10, 4, 0.5);
@@ -174,7 +183,7 @@ public final class WorldLyrics extends Module implements GameRenderListener {
 			long age = now - word.born();
 			float born = Math.min(1f, age / 300f);
 			float gone = Math.max(0f, (age / (float) life - 0.6f) / 0.4f);
-			float width = modern ? WorldFont.width(Fonts.BOLD, word.text()) : WorldFont.vanillaWidth(word.text());
+			float width = modern ? WorldFont.width(WorldFontHolder.FONT, word.text()) : WorldFont.vanillaWidth(word.text());
 
 			event.matrices.push();
 			event.matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
@@ -185,7 +194,7 @@ public final class WorldLyrics extends Module implements GameRenderListener {
 			event.matrices.scale(scale, modern ? scale : -scale, scale);
 			event.matrices.translate(-width / 2f, 0f, 0f);
 
-			if (modern) WorldFont.draw(Fonts.BOLD, event.matrices, word.text(), hot, cold, phase, gone, born, GLOW);
+			if (modern) WorldFont.draw(WorldFontHolder.FONT, event.matrices, word.text(), hot, cold, phase, gone, born, GLOW);
 			else WorldFont.vanilla(event.matrices, word.text(), Theme.fade(hot, 1f - gone));
 
 			event.matrices.pop();

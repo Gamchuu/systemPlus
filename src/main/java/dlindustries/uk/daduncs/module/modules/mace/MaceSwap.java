@@ -36,7 +36,7 @@ import dlindustries.uk.daduncs.module.setting.number;
 import dlindustries.uk.daduncs.module.setting.range;
 import dlindustries.uk.daduncs.utils.EncryptedString;
 import dlindustries.uk.daduncs.utils.InventoryUtils;
-import dlindustries.uk.daduncs.utils.MouseSimulation;
+import dlindustries.uk.daduncs.utils.InputUtils;
 import dlindustries.uk.daduncs.utils.WorldUtils;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -329,7 +329,7 @@ public final class MaceSwap extends Module implements AttackListener, TickListen
 					actionSentThisTick = true;
 				}
 				if (inputSimulation.getValue()) {
-					MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+					InputUtils.leftClick();
 				}
 				pendingShieldBreakTarget = null;
 			}

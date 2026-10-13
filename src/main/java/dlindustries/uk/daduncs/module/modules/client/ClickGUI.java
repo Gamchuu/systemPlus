@@ -31,10 +31,10 @@ import dlindustries.uk.daduncs.module.setting.colour;
 import dlindustries.uk.daduncs.module.setting.mode;
 import dlindustries.uk.daduncs.utils.EncryptedString;
 import dlindustries.uk.daduncs.utils.Sounds;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.sound.SoundEvent;
 import org.lwjgl.glfw.GLFW;
 
 public final class ClickGUI extends Module {

@@ -20,8 +20,8 @@
 
 package dlindustries.uk.daduncs.render;
 
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.DrawContext;
 
 public final class Render2D {
 

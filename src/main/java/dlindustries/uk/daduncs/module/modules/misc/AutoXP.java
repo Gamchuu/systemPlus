@@ -29,7 +29,7 @@ import dlindustries.uk.daduncs.module.setting.bool;
 import dlindustries.uk.daduncs.module.setting.number;
 import dlindustries.uk.daduncs.utils.EncryptedString;
 import dlindustries.uk.daduncs.utils.MathUtils;
-import dlindustries.uk.daduncs.utils.MouseSimulation;
+import dlindustries.uk.daduncs.utils.InputUtils;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -87,7 +87,7 @@ public final class AutoXP extends Module implements TickListener, ItemUseListene
 
 		if (!dontThrow && randomInt <= chance.getValueInt() && !AntibanbyDaduncs.isAttackSent() && !AntibanbyDaduncs.isSlotPending()) {
 			if (clickSimulation.getValue())
-				MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+				InputUtils.rightClick();
 
 			ActionResult result = mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
 			if (result.isAccepted()) mc.player.swingHand(Hand.MAIN_HAND);

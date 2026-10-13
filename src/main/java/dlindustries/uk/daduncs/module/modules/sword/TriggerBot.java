@@ -279,7 +279,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 				if (mc.interactionManager != null) {
 					mc.interactionManager.stopUsingItem(mc.player);
 				}
-				MouseSimulation.mouseRelease(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+				InputUtils.release("rightclick");
 			} else if (mc.player.isUsingItem() && mc.interactionManager != null) {
 				mc.interactionManager.stopUsingItem(mc.player);
 			}
@@ -300,7 +300,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 			WorldUtils.hitEntity(entity, swing.getValue());
 
 			if (clickSimulation.getValue()) {
-				MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+				InputUtils.leftClick();
 			}
 
 			if (holdingMace) isMaceAttack = false;
@@ -315,7 +315,7 @@ public final class TriggerBot extends Module implements TickListener, AttackList
 			currentDelay = Math.max(50, baseDelay);
 			timer.reset();
 		} else if (useShield.getValue() && mc.player.getOffHandStack().isOf(Items.SHIELD)) {
-			MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT, shieldTime.getValueInt());
+			InputUtils.rightClickHold(shieldTime.getValueInt());
 		}
 	}
 

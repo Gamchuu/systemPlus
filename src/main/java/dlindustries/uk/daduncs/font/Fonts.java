@@ -20,26 +20,50 @@
 
 package dlindustries.uk.daduncs.font;
 
-import java.awt.Font;
+import dlindustries.uk.daduncs.render.skia.SkiaFont;
 
+/**
+ * The client's font styles. Each {@link SkiaFont} keeps the same bundled
+ * TrueType file and size as before, so the API the UI calls
+ * ({@code drawString} / {@code drawGlow} / {@code getStringWidth} /
+ * {@code getFontHeight}) is unchanged; when {@code SkiaRenderer.ENABLED} is
+ * true the text is shaped and drawn by Skia on the UI surface instead of the
+ * legacy AWT glyph atlas.
+ */
 public final class Fonts {
-	public static GlyphPageFontRenderer QUICKSAND = GlyphPageFontRenderer.createFromID("/assets/system/font/font.ttf", 40, false, false, false);
-	public static GlyphPageFontRenderer BOLD = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 40, Font.BOLD);
-	public static GlyphPageFontRenderer LIGHT = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 26, Font.PLAIN);
-	public static GlyphPageFontRenderer TIP = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 31, Font.PLAIN);
-	public static GlyphPageFontRenderer SMALL = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 18, Font.PLAIN);
-	public static GlyphPageFontRenderer SMALLBOLD = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 20, Font.BOLD);
-	public static GlyphPageFontRenderer TITLE = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 30, Font.BOLD);
-	public static GlyphPageFontRenderer MENU = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 24, Font.BOLD);
-	public static GlyphPageFontRenderer TINY = GlyphPageFontRenderer.createStyled("/assets/system/font/unbounded.ttf", 15, Font.PLAIN);
-	public static GlyphPageFontRenderer LABEL = GlyphPageFontRenderer.createStyled("/assets/system/font/misans.ttf", 30, Font.PLAIN);
-	public static GlyphPageFontRenderer LABEL_MENU = GlyphPageFontRenderer.createStyled("/assets/system/font/misans.ttf", 26, Font.PLAIN);
-	public static GlyphPageFontRenderer LABEL_SMALL = GlyphPageFontRenderer.createStyled("/assets/system/font/misans.ttf", 18, Font.PLAIN);
-	public static GlyphPageFontRenderer PRODUCT_SANS_MEDIUM_36 = GlyphPageFontRenderer.createStyled("/assets/system/font/product_sans_medium.ttf", 36, Font.PLAIN);
-	public static GlyphPageFontRenderer PRODUCT_SANS_MEDIUM_18 = GlyphPageFontRenderer.createStyled("/assets/system/font/product_sans_medium.ttf", 18, Font.PLAIN);
-	public static GlyphPageFontRenderer PRODUCT_SANS_REGULAR_32 = GlyphPageFontRenderer.createStyled("/assets/system/font/product_sans_regular.ttf", 32, Font.PLAIN);
-	public static GlyphPageFontRenderer PRODUCT_SANS_REGULAR_16 = GlyphPageFontRenderer.createStyled("/assets/system/font/product_sans_regular.ttf", 16, Font.PLAIN);
+	public static SkiaFont QUICKSAND = new SkiaFont("/assets/system/font/font.ttf", 40);
+	public static SkiaFont BOLD = new SkiaFont("/assets/system/font/unbounded.ttf", 40, true);
+	public static SkiaFont LIGHT = new SkiaFont("/assets/system/font/unbounded.ttf", 26);
+	public static SkiaFont TIP = new SkiaFont("/assets/system/font/unbounded.ttf", 31);
+	public static SkiaFont SMALL = new SkiaFont("/assets/system/font/unbounded.ttf", 18);
+	public static SkiaFont SMALLBOLD = new SkiaFont("/assets/system/font/unbounded.ttf", 20, true);
+	public static SkiaFont TITLE = new SkiaFont("/assets/system/font/unbounded.ttf", 30, true);
+	public static SkiaFont MENU = new SkiaFont("/assets/system/font/unbounded.ttf", 24, true);
+	public static SkiaFont TINY = new SkiaFont("/assets/system/font/unbounded.ttf", 15);
+	public static SkiaFont LABEL = new SkiaFont("/assets/system/font/misans.ttf", 30);
+	public static SkiaFont LABEL_MENU = new SkiaFont("/assets/system/font/misans.ttf", 26);
+	public static SkiaFont LABEL_SMALL = new SkiaFont("/assets/system/font/misans.ttf", 18);
+	public static SkiaFont PRODUCT_SANS_MEDIUM_36 = new SkiaFont("/assets/system/font/product_sans_medium.ttf", 36);
+	public static SkiaFont PRODUCT_SANS_MEDIUM_18 = new SkiaFont("/assets/system/font/product_sans_medium.ttf", 18);
+	public static SkiaFont PRODUCT_SANS_REGULAR_32 = new SkiaFont("/assets/system/font/product_sans_regular.ttf", 32);
+	public static SkiaFont PRODUCT_SANS_REGULAR_16 = new SkiaFont("/assets/system/font/product_sans_regular.ttf", 16);
 
 	public static void preload() {
+		QUICKSAND.preload();
+		BOLD.preload();
+		LIGHT.preload();
+		TIP.preload();
+		SMALL.preload();
+		SMALLBOLD.preload();
+		TITLE.preload();
+		MENU.preload();
+		TINY.preload();
+		LABEL.preload();
+		LABEL_MENU.preload();
+		LABEL_SMALL.preload();
+		PRODUCT_SANS_MEDIUM_36.preload();
+		PRODUCT_SANS_MEDIUM_18.preload();
+		PRODUCT_SANS_REGULAR_32.preload();
+		PRODUCT_SANS_REGULAR_16.preload();
 	}
 }

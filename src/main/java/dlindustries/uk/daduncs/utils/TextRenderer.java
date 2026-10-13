@@ -23,6 +23,7 @@ package dlindustries.uk.daduncs.utils;
 import dlindustries.uk.daduncs.font.Fonts;
 import dlindustries.uk.daduncs.gui.Theme;
 import dlindustries.uk.daduncs.module.modules.client.ClickGUI;
+import dlindustries.uk.daduncs.render.skia.SkiaRenderer;
 import net.minecraft.client.gui.DrawContext;
 import org.joml.Matrix3x2fStack;
 
@@ -32,7 +33,10 @@ import static dlindustries.uk.daduncs.System.mc;
 public final class TextRenderer {
 
 	private static boolean modern() {
-		return ClickGUI.modern.getValue();
+		// In Skia mode the custom fonts are shaped and drawn by Skia onto the UI
+		// surface; forcing modern keeps the text on that surface instead of
+		// Blaze3D (which would be composited underneath the Skia layer).
+		return SkiaRenderer.ENABLED || ClickGUI.modern.getValue();
 	}
 
 	private static void vanilla(CharSequence string, DrawContext context, int x, int y, int color, float scale, int drop) {
@@ -207,6 +211,14 @@ public final class TextRenderer {
 		return modern() ? Fonts.BOLD.getFontHeight() : 17;
 	}
 
+	public static float[] boldAdvances(CharSequence string) {
+		return Fonts.BOLD.getCharacterAdvances(string);
+	}
+
+	public static float[] menuAdvances(CharSequence string) {
+		return Fonts.MENU.getCharacterAdvances(string);
+	}
+
 	public static int titleWidth(CharSequence string) {
 		return modern() ? Fonts.TITLE.getStringWidth(string) : vanillaWidth(string, 1.6f);
 	}
@@ -293,4 +305,49 @@ public final class TextRenderer {
 		int accentColor = Theme.fade(Theme.accent, Math.min(200f / 255f, alpha));
 		Fonts.PRODUCT_SANS_REGULAR_16.drawString(context, version, x + nameWidth + 3, y - 2, accentColor);
 	}
+
+	public static void drawBoldGradient(CharSequence string, DrawContext context, float x, float y, int colorStart, int colorEnd, dlindustries.uk.daduncs.render.skia.SkiaGradient direction) {
+		if (!modern()) {
+			vanilla(string, context, Math.round(x), Math.round(y), colorStart, 1.9f, 8);
+			return;
+		}
+
+		Fonts.BOLD.drawGradient(context, string, x, y - 8, colorStart, colorEnd, direction);
+	}
+
+	public static void drawGradient(CharSequence string, DrawContext context, float x, float y, int colorStart, int colorEnd, dlindustries.uk.daduncs.render.skia.SkiaGradient direction) {
+		if (!modern()) {
+			vanilla(string, context, Math.round(x), Math.round(y), colorStart, 1.9f, 8);
+			return;
+		}
+
+		Fonts.QUICKSAND.drawGradient(context, string, x, y - 8, colorStart, colorEnd, direction);
+	}
+
+	public static void drawBoldWrapped(CharSequence string, DrawContext context, float x, float y, float maxWidth, int color) {
+		if (!modern()) {
+			vanilla(string, context, Math.round(x), Math.round(y), color, 1.9f, 8);
+			return;
+		}
+
+		Fonts.BOLD.drawWrapped(context, string, x, y - 8, maxWidth, color);
+	}
+
+	public static void drawWrapped(CharSequence string, DrawContext context, float x, float y, float maxWidth, int color) {
+		if (!modern()) {
+			vanilla(string, context, Math.round(x), Math.round(y), color, 1.9f, 8);
+			return;
+		}
+
+		Fonts.QUICKSAND.drawWrapped(context, string, x, y - 8, maxWidth, color);
+	}
+
+	public static int boldWrappedHeight(CharSequence string, float maxWidth) {
+		return modern() ? Fonts.BOLD.getWrappedHeight(string, maxWidth) : boldHeight();
+	}
+
+	public static int wrappedHeight(CharSequence string, float maxWidth) {
+		return modern() ? Fonts.QUICKSAND.getWrappedHeight(string, maxWidth) : Fonts.QUICKSAND.getFontHeight();
+	}
 }
+

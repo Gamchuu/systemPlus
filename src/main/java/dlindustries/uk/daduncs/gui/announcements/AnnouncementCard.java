@@ -34,9 +34,9 @@ import dlindustries.uk.daduncs.module.setting.*;
 import dlindustries.uk.daduncs.render.Render2D;
 import dlindustries.uk.daduncs.utils.Sounds;
 import dlindustries.uk.daduncs.utils.TextRenderer;
+import net.minecraft.util.Identifier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
 import org.joml.Matrix3x2fStack;
 
 public final class AnnouncementCard {

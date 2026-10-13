@@ -233,7 +233,7 @@ public final class AnchorMacro extends Module implements TickListener, ItemUseLi
 									glowstoneTargetDelay = calculateDelay(glowstoneDelay);
 
 									if (clickSimulation.getValue())
-										MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+										InputUtils.rightClick();
 
 									dlindustries.uk.daduncs.managers.Recorder tm = dlindustries.uk.daduncs.managers.Recorder.getInstance();
 									if (tm != null) {
@@ -303,7 +303,7 @@ public final class AnchorMacro extends Module implements TickListener, ItemUseLi
 
 								if (!onlyCharge.getValue()) {
 									if (clickSimulation.getValue() && !isAirplaced)
-										MouseSimulation.mouseClick(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+										InputUtils.rightClick();
 
 									dlindustries.uk.daduncs.managers.Recorder tm = dlindustries.uk.daduncs.managers.Recorder.getInstance();
 									boolean shouldAirplace = activateHeld && doubleAnchorEnabled && !isAirplaced && mc.player.getMainHandStack().isOf(Items.RESPAWN_ANCHOR);
